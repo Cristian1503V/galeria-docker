@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  backend:
+    build: ./Server
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./Server:/app
+  frontend:
+    build: ./Client
+    ports:
+      - "4321:4321"
+    depends_on:
+      - backend
+      
+  jenkins:
+    image: jenkins/jenkins:lts
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    container_name: ci_jenkins
+
+volumes:
+  jenkins_home:

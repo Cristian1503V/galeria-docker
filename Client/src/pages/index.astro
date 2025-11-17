@@ -1,0 +1,50 @@
+---
+import Gallery from "../components/Gallery.astro";
+
+// ⚙️ URL del backend — forzar IPv4 para evitar que `localhost` resuelva a ::1 y cause ECONNREFUSED
+const API_URL = "http://127.0.0.1:3000/api/unsplash/imagenes"; // docker-compose usará "backend" como host
+
+let images = [];
+
+try {
+  const res = await fetch(API_URL);
+  if (res.ok) {
+    images = await res.json();
+  }
+} catch (error) {
+  console.error("Error fetching images:", error);
+}
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Galería Docker - Estilo Unsplash</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f9fafb;
+        margin: 0;
+      }
+      header {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: white;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+      header h1 {
+        font-size: 1.8rem;
+        margin: 0;
+        color: #111;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Galería de Libros 🚀</h1>
+    </header>
+
+    <Gallery images={images} />
+  </body>
+</html>
