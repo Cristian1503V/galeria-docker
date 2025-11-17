@@ -20,7 +20,7 @@ app.get("/api/imagenes", (req, res) => {
   const archivos = fs.readdirSync(IMAGES_DIR);
   const imagenes = archivos.map((nombre) => ({
     nombre,
-    url: `http://localhost:4000/images/${nombre}`,
+    url: `http://backend:4000/images/${nombre}`,
   }));
   res.json(imagenes);
 });
@@ -33,7 +33,7 @@ app.get("/api/unsplash/imagenes", async (req, res) => {
   }
 
   try {
-    const response = await fetch("https://api.unsplash.com/photos/random?count=20", {
+    const response = await fetch("https://api.unsplash.com/photos/random?count=100", {
       headers: { Authorization: `Client-ID ${accessKey}` },
     });
 
@@ -69,7 +69,7 @@ app.get("/api/unsplash/imagenes", async (req, res) => {
 });
 
 // Bind explicitly to 0.0.0.0 so the server is reachable from Docker host/container mappings.
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 // Listen on 0.0.0.0 so the server is reachable from outside the container,
 // but show the more familiar localhost URL in the log message.
 app.listen(PORT, "0.0.0.0", () => console.log(`✅ Backend escuchando en http://localhost:${PORT}`));

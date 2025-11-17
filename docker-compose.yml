@@ -1,18 +1,25 @@
 version: "3.8"
 services:
+
   backend:
     build: ./Server
     ports:
       - "4000:4000"
     volumes:
       - ./Server:/app
+      - /app/node_modules
+    environment:
+      - PORT=4000
   frontend:
     build: ./Client
     ports:
       - "4321:4321"
+    volumes:
+      - /app/node_modules
+      - /app/dist
     depends_on:
       - backend
-      
+
   jenkins:
     image: jenkins/jenkins:lts
     user: root

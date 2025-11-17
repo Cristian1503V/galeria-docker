@@ -2,12 +2,15 @@
 import Gallery from "../components/Gallery.astro";
 
 // ⚙️ URL del backend — forzar IPv4 para evitar que `localhost` resuelva a ::1 y cause ECONNREFUSED
-const API_URL = "http://127.0.0.1:3000/api/unsplash/imagenes"; // docker-compose usará "backend" como host
+const API_URL = "http://localhost:4000/api/unsplash/imagenes"; // docker-compose usará "backend" como host
 
 let images = [];
 
 try {
   const res = await fetch(API_URL);
+
+  console.log("Fetch response status:", res);
+
   if (res.ok) {
     images = await res.json();
   }

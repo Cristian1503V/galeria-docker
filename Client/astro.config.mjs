@@ -1,5 +1,5 @@
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  server: { port: 3001 },
+  server: { port: 4321 },
 });
