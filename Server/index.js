@@ -82,6 +82,7 @@ export const createApp = (dependencies = {}) => {
 };
 
 // Solo ejecutar el servidor si se llama directamente (no en tests)
+/* istanbul ignore next */
 if (import.meta.url === `file://${process.argv[1]}`) {
   const app = createApp();
   const PORT = process.env.PORT || 4000;

@@ -19,6 +19,9 @@ describe("API Backend Tests - Express App", () => {
     // Importar createApp
     const indexModule = await import("../index.js");
     createApp = indexModule.createApp;
+    // Silenciar logs ruidosos durante tests para mantener la salida limpia
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "log").mockImplementation(() => {});
   });
 
   beforeEach(() => {
@@ -50,6 +53,19 @@ describe("API Backend Tests - Express App", () => {
   afterAll(() => {
     // Restaurar variables de entorno originales
     process.env = originalEnv;
+    // Restaurar spies de consola
+    if (console.error.mockRestore) console.error.mockRestore();
+    if (console.log.mockRestore) console.log.mockRestore();
+  });
+
+  // ============================================
+  // TESTS: Inicialización
+  // ============================================
+  describe("Inicialización de la App", () => {
+    it("inicializa con dependencias por defecto cuando no se proveen", () => {
+      const appDefault = createApp();
+      expect(appDefault).toBeDefined();
+    });
   });
 
   // ============================================
@@ -710,6 +726,63 @@ describe("API Backend Tests - Express App", () => {
       await request(app)
         .post("/api/imagenes")
         .expect(404);
+    });
+  });
+
+  // Tests adicionales para cubrir ramas defensivas y respuestas malformadas
+  describe("Casos adicionales para aumentar branch coverage", () => {
+    it("maneja items de Unsplash sin campo 'urls' (malformado)", async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => [{ id: "no_urls", user: { id: "u1", name: "U" } }],
+      });
+
+      const res = await request(app).get("/api/unsplash/imagenes").expect(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      // Si el elemento se filtra o se devuelve con valores por defecto, no debe romper
+      if (res.body.length > 0) expect(res.body[0].id).toBeDefined();
+    });
+
+    it("maneja items de Unsplash sin 'user' (malformado)", async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => [{ id: "nouser", urls: { full: "https://x" } }],
+      });
+
+      const res = await request(app).get("/api/unsplash/imagenes").expect(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      if (res.body.length > 0) expect(res.body[0].id).toBe("nouser");
+    });
+
+    it("responde correctamente a OPTIONS (preflight CORS)", async () => {
+      await request(app)
+        .options("/api/imagenes")
+        .expect((res) => {
+          if (!res.headers["access-control-allow-methods"]) throw new Error("No CORS methods header");
+        });
+    });
+
+    it("GET /api/imagenes maneja readdirSync devolviendo non-array (defensive)", async () => {
+      // El servidor actualmente lanza error si readdirSync no devuelve un array,
+      // por lo que esperamos un 500 y un mensaje de error en el cuerpo.
+      mockFs.readdirSync.mockReturnValue(null);
+      const res = await request(app).get("/api/imagenes").expect(500);
+      expect(res.body).toHaveProperty("error");
+      expect(res.body.error).toContain("Error al leer el directorio");
+    });
+
+    it("GET /api/unsplash/imagenes maneja respuesta no-JSON o tipo inesperado", async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => "I am not an array",
+      });
+
+      const res = await request(app).get("/api/unsplash/imagenes").expect(200);
+      // Debe devolver un array (defensivo) incluso cuando la API responde con un string
+      expect(Array.isArray(res.body)).toBe(true);
     });
   });
 });
