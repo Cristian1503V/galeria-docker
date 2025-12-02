@@ -3,50 +3,61 @@ name: SonarCloud Analysis
 on:
   pull_request:
     branches: ["main"]
+  push:
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
+  contents: read
   pull-requests: read
 
 jobs:
   analysis:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20.18.0
+          cache: "npm"
 
-      # Instalación y pruebas del CLIENT
       - name: Install Client dependencies
         working-directory: ./Client
-        run: npm i
+        run: npm ci
 
-      - name: Run Client tests with coverage
+      - name: Run Client tests (coverage)
         working-directory: ./Client
         run: npm run test:coverage
 
-      # Instalación y pruebas del SERVER
       - name: Install Server dependencies
         working-directory: ./Server
-        run: npm i
+        run: npm ci
 
-      - name: Run Server tests with coverage
+      - name: Run Server tests (coverage)
         working-directory: ./Server
         run: npm run test:coverage
 
-      # Análisis con SonarCloud
+      - name: Upload coverage artifact (optional, debug)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            Client/coverage/lcov.info
+            Server/coverage/lcov.info
+
       - name: Analyze with SonarCloud
-        uses: SonarSource/sonarcloud-github-action@v2.0.1
+        uses: SonarSource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
         with:
-          projectBaseDir: .
-          args: -X
+          args: >
+            -Dsonar.projectKey=Cristian1503V_galeria-docker
+            -Dsonar.organization=cristian1503v
+            -Dsonar.sources=Server,Client
+            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**
+            -Dsonar.javascript.lcov.reportPaths=Client/coverage/lcov.info,Server/coverage/lcov.info
