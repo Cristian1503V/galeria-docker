@@ -24,11 +24,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.18.0
-          cache: "npm"
 
       - name: Install Client dependencies
         working-directory: ./Client
-        run: npm ci
+        run: npm i
 
       - name: Run Client tests (coverage)
         working-directory: ./Client
@@ -36,7 +35,7 @@ jobs:
 
       - name: Install Server dependencies
         working-directory: ./Server
-        run: npm ci
+        run: npm i
 
       - name: Run Server tests (coverage)
         working-directory: ./Server
