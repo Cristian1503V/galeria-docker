@@ -58,5 +58,5 @@ jobs:
             -Dsonar.projectKey=Cristian1503V_galeria-docker
             -Dsonar.organization=cristian1503v
             -Dsonar.sources=Server,Client
-            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**
+            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/coverage/**,**/__tests__/**,**/*.test.js,**/*.spec.js,**/*.config.js
             -Dsonar.javascript.lcov.reportPaths=Client/coverage/lcov.info,Server/coverage/lcov.info
