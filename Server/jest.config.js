@@ -5,12 +5,18 @@ export default {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   testMatch: ["**/__tests__/**/*.test.js", "**/?(*.)+(spec|test).js"],
+
   collectCoverageFrom: [
-    "**/*.js",
-    "!**/node_modules/**",
-    "!**/coverage/**",
+    "*.js",
+    "!node_modules/**",
+    "!coverage/**",
     "!jest.config.js",
+    "!**/__tests__/**",
+    "!**/*.test.js",
+    "!**/*.spec.js",
+    "!**/*.config.js",
   ],
+
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
 };
