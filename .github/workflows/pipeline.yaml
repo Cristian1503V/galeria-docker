@@ -1,0 +1,53 @@
+name: SonarCloud Analysis
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  pull-requests: read
+
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.18.0
+
+      # Instalación y pruebas del CLIENT
+      - name: Install Client dependencies
+        working-directory: ./Client
+        run: npm ci
+
+      - name: Run Client tests with coverage
+        working-directory: ./Client
+        run: npm run test:coverage
+
+      # Instalación y pruebas del SERVER
+      - name: Install Server dependencies
+        working-directory: ./Server
+        run: npm ci
+
+      - name: Run Server tests with coverage
+        working-directory: ./Server
+        run: npm run test:coverage
+
+      # Análisis con SonarCloud
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v2.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          projectBaseDir: .
+          args: -X
